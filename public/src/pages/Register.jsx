@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import Logo from "../assets/Logo.svg";
@@ -20,8 +20,14 @@ const Register = () => {
     position: "bottom-right",
     autoClose: 8000,
     pauseOnHover: true,
-    theme: "white",
+    theme: "dark",
   };
+ 
+  useEffect(() => {
+    if (localStorage.getItem("chat-app-user")) {
+      navigate("/");
+    }
+  }, []);
 
   const handleSubmit = async(event) => {
     event.preventDefault();

@@ -1,4 +1,3 @@
-import React from 'react'
 
 const Chat = () => {
   return (
@@ -6,4 +5,4 @@ const Chat = () => {
   )
 }
 
-export default Chat
+export default Chat;
