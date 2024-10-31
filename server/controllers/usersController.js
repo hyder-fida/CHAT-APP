@@ -44,3 +44,27 @@ module.exports.login = async (req, res, next) => {
     next(err);
   }
 };
+
+module.exports.setavatar = async (req, res, next) => {
+  try {
+    const userId = req.params.id;
+    const avatarImage = req.body.image;
+
+    const userData = await User.findOneAndUpdate(
+      { _id: userId }, 
+      { isAvatarImageSet: true, avatarImage }, 
+      { new: true } 
+    );
+
+    if (!userData) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    return res.json({
+      isSet: userData.isAvatarImagesSet,
+      image: userData.avatarImage,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
