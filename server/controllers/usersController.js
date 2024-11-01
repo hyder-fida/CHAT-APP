@@ -45,7 +45,7 @@ module.exports.login = async (req, res, next) => {
   }
 };
 
-module.exports.setavatar = async (req, res, next) => {
+module.exports.setavatar = async (req, res) => {
   try {
     const userId = req.params.id;
     const avatarImage = req.body.image;
@@ -61,9 +61,27 @@ module.exports.setavatar = async (req, res, next) => {
     }
 
     return res.json({
-      isSet: userData.isAvatarImagesSet,
+      isSet: userData.isAvatarImageSet, // Fixed property name
       image: userData.avatarImage,
     });
+  } catch (error) {
+    console.error("Error setting avatar:", error); // Log the error for debugging
+    return res.status(500).json({ msg: 'Internal server error', error: error.message });
+  }
+};
+
+
+module.exports.getAllUsers = async (req, res, next) => {
+  try {
+    const users = await User.find ({_id: { $ne: req.params.id }}).select([
+      "email",
+      "username",
+      "avatarImage",
+      "_id",
+
+    ]);
+     
+    return res.json(users);
   } catch (error) {
     next(error);
   }
