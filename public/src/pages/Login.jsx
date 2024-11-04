@@ -1,104 +1,98 @@
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import styled from "styled-components";
-import Logo from "../assets/Logo.svg";
+import { useNavigate, Link } from "react-router-dom";
+import Logo from "../assets/logo.svg";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import axios from "axios";
 import { loginRoute } from "../utils/APIRoutes";
 
-const Login = () => {
+export default function Login() {
   const navigate = useNavigate();
-  const [values, setValues] = useState({
-    username: "",
-    password: "",
-  });
-
+  const [values, setValues] = useState({ username: "", password: "" });
   const toastOptions = {
     position: "bottom-right",
     autoClose: 8000,
     pauseOnHover: true,
+    draggable: true,
     theme: "dark",
   };
 
   useEffect(() => {
-    if (localStorage.getItem("chat-app-user")) {
+    if (localStorage.getItem(process.env.MONGODB_URL)) {
       navigate("/");
     }
-  }, []);
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    if (handleValidation()) {
-      const { password, username } = values;
-      try {
-        const { data } = await axios.post(loginRoute, {
-          username,
-          password,
-        });
-        if (data.status === false) {
-          toast.error(data.mesg, toastOptions);
-        } else if (data.status === true) {
-          localStorage.setItem("chat-app-user", JSON.stringify(data.user));
-          navigate("/");
-        }
-      } catch (error) {
-        toast.error("Error connecting to server", toastOptions);
-      }
-    }
-  };
-
-  const handleValidation = () => {
-    const { password, username } = values;
-
-    if (username.trim().length === 0) {
-      toast.error("Username is required", toastOptions);
-      return false;
-    }
-    if (password.trim().length === 0) {
-      toast.error("Password is required", toastOptions);
-      return false;
-    }
-    return true;
-  };
+  }, [navigate]);
 
   const handleChange = (event) => {
     setValues({ ...values, [event.target.name]: event.target.value });
   };
 
+  const validateForm = () => {
+    const { username, password } = values;
+    if (!username || !password) {
+      toast.error("Username and Password are required.", toastOptions);
+      return false;
+    }
+    return true;
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (validateForm()) {
+      const { username, password } = values;
+      try {
+        const { data } = await axios.post(loginRoute, { username, password });
+        if (!data.status) {
+          toast.error(data.msg, toastOptions);
+        } else {
+          localStorage.setItem(
+            process.env.REACT_APP_LOCALHOST_KEY,
+            JSON.stringify(data.user)
+          );
+          navigate("/");
+        }
+      } catch (error) {
+        toast.error("An error occurred. Please try again.", toastOptions);
+      }
+    }
+  };
+
   return (
     <>
-      <ToastContainer />
       <FormContainer>
         <form onSubmit={handleSubmit}>
           <div className="brand">
-            <img src={Logo} alt="Logo" />
-            <h1>Snappy</h1>
+            <img src={Logo} alt="logo" />
+            <h1>snappy</h1>
           </div>
           <input
             type="text"
-            placeholder="Enter your username"
+            placeholder="Username"
             name="username"
-            minLength="3"
+            aria-label="Username"
             onChange={handleChange}
+            minLength="3"
+            required
           />
           <input
             type="password"
-            placeholder="Enter your password"
+            placeholder="Password"
             name="password"
+            aria-label="Password"
             onChange={handleChange}
+            required
           />
-          <button type="submit">Login</button>
+          <button type="submit">Log In</button>
           <span>
-            Don&apos;t have an account? <Link to="/register">Create new</Link>
+            Don't have an account? <Link to="/register">Create One</Link>.
           </span>
-          
         </form>
       </FormContainer>
+      <ToastContainer />
     </>
   );
-};
+}
 
 const FormContainer = styled.div`
   height: 100vh;
@@ -109,6 +103,7 @@ const FormContainer = styled.div`
   gap: 1rem;
   align-items: center;
   background-color: #131324;
+
   .brand {
     display: flex;
     align-items: center;
@@ -129,8 +124,9 @@ const FormContainer = styled.div`
     gap: 2rem;
     background-color: #00000076;
     border-radius: 2rem;
-    padding: 3rem 5rem;
+    padding: 5rem;
   }
+
   input {
     background-color: transparent;
     padding: 1rem;
@@ -144,6 +140,7 @@ const FormContainer = styled.div`
       outline: none;
     }
   }
+
   button {
     background-color: #4e0eff;
     color: white;
@@ -158,6 +155,7 @@ const FormContainer = styled.div`
       background-color: #4e0eff;
     }
   }
+
   span {
     color: white;
     text-transform: uppercase;
@@ -168,5 +166,3 @@ const FormContainer = styled.div`
     }
   }
 `;
-
-export default Login;

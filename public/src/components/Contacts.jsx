@@ -1,16 +1,21 @@
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import Logo from "../assets/logo.svg";
-import { useEffect, useState } from "react";
-const Contacts = ({ contacts, currentUser }) => {
-  const [currentUserName, setCurrentUserName] = useState();
+
+export default function Contacts({ contacts, changeChat }) {
+  const [currentUserName, setCurrentUserName] = useState(undefined);
   const [currentUserImage, setCurrentUserImage] = useState(undefined);
   const [currentSelected, setCurrentSelected] = useState(undefined);
 
   useEffect(() => {
-    if (currentUser) {
-      setCurrentUserImage(currentUser.avatarImage);
-      setCurrentUserName(currentUser.currentUser);
-    }
+    const fetchUserData = async () => {
+      const data = await JSON.parse(
+        localStorage.getItem(process.env.MONGODB_URL)
+      );
+      setCurrentUserName(data.username);
+      setCurrentUserImage(data.avatarImage);
+    };
+    fetchUserData();
   }, []);
 
   const changeCurrentChat = (index, contact) => {
@@ -20,11 +25,11 @@ const Contacts = ({ contacts, currentUser }) => {
 
   return (
     <>
-      {currentUserImage && currentUserImage && (
+      {currentUserImage && currentUserName && (
         <Container>
           <div className="brand">
             <img src={Logo} alt="logo" />
-            <h3>Snappy</h3>
+            <h3>snappy</h3>
           </div>
           <div className="contacts">
             {contacts.map((contact, index) => {
@@ -33,12 +38,12 @@ const Contacts = ({ contacts, currentUser }) => {
                   key={contact._id}
                   className={`contact ${
                     index === currentSelected ? "selected" : ""
-                  } `}
+                  }`}
                   onClick={() => changeCurrentChat(index, contact)}
                 >
                   <div className="avatar">
                     <img
-                      src={`data:image/svg+xml;base64,${avatar}`}
+                      src={`data:image/svg+xml;base64,${contact.avatarImage}`}
                       alt="avatar"
                     />
                   </div>
@@ -152,4 +157,3 @@ const Container = styled.div`
     }
   }
 `;
-export default Contacts;
